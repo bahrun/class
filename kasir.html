@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kasir</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- supaya sederhana saya buat css satu halaman boleh dipisahkan kalau ingin lbih sederhana -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        main {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .transaction-info, .product-list, .cart {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .transaction-info input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .product-list, .cart {
+            width: 48%;
+        }
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .product {
+            background: #ddd;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            flex: 1;
+        }
+        .product button {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .product button:hover {
+            background: #218838;
+        }
+        #cart-items {
+            list-style: none;
+            padding: 0;
+        }
+        #cart-items li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+        #checkout {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #checkout:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Aplikasi Kasir</h1>
+        </header>
+        <!-- tampilan boleh dikembangkan lagi dengan keinginan dan style kalian dan menambah nilai -->
+        <div class="transaction-info">
+            <h2>Informasi Transaksi</h2>
+            <label>No Transaksi</label>
+            <input type="text" id="no-transaksi" readonly value="TRX123456">
+            <label>Tanggal</label>
+            <input type="date" id="tanggal-transaksi" value="">
+            <label>Nama Pembeli</label>
+            <input type="text" id="nama-pembeli" placeholder="Masukkan nama pembeli">
+            <label>ID Barang (Input Manual / Barcode)</label>
+            <input type="text" id="id-barang" placeholder="Scan atau input ID barang">
+        </div>
+        
+        <main>
+            <section class="product-list">
+                <h2>Daftar Produk</h2>
+                <div class="products">
+                    <div class="product" data-name="Laptop" data-price="5000000">
+                        <h3>Laptop</h3>
+                        <p>Rp 5.000.000</p>
+                        <button class="add-to-cart">Tambah</button>
+                    </div>
+                    <div class="product" data-name="Mouse" data-price="150000">
+                        <h3>Mouse</h3>
+                        <p>Rp 150.000</p>
+                        <button class="add-to-cart">Tambah</button>
+                    </div>
+                    <div class="product" data-name="Keyboard" data-price="300000">
+                        <h3>Keyboard</h3>
+                        <p>Rp 300.000</p>
+                        <button class="add-to-cart">Tambah</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="cart">
+                <h2>Keranjang Belanja</h2>
+                <ul id="cart-items"></ul>
+                <h3>Total: Rp <span id="total-price">0</span></h3>
+                <button id="checkout">Checkout</button>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // js hanya berfugsi untuk membuat contoh tidak statis boleh dihapus dan dikembangkan dengan aplikasi kalian
+        document.addEventListener("DOMContentLoaded", function () {
+            const cartItems = document.getElementById("cart-items");
+            const totalPrice = document.getElementById("total-price");
+            const addToCartButtons = document.querySelectorAll(".add-to-cart");
+            let cart = [];
+            
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const product = this.parentElement;
+                    const name = product.getAttribute("data-name");
+                    const price = parseFloat(product.getAttribute("data-price"));
+                    
+                    const existingItem = cart.find(item => item.name === name);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                        existingItem.subtotal += price;
+                    } else {
+                        cart.push({ name, price, quantity: 1, subtotal: price });
+                    }
+                    updateCart();
+                });
+            });
+            
+            function updateCart() {
+                cartItems.innerHTML = "";
+                let total = 0;
+                cart.forEach(item => {
+                    total += item.subtotal;
+                    const li = document.createElement("li");
+                    li.innerHTML = `${item.name} (x${item.quantity}) - Rp ${item.subtotal.toLocaleString()}`;
+                    cartItems.appendChild(li);
+                });
+                totalPrice.textContent = total.toLocaleString();
+            }
+            
+            document.getElementById("checkout").addEventListener("click", function () {
+                if (cart.length === 0) {
+                    alert("Keranjang masih kosong!");
+                    return;
+                }
+                alert("Pembayaran berhasil! Total: Rp " + totalPrice.textContent);
+                cart = [];
+                updateCart();
+            });
+        });
+    </script>
+</body>
+</html>
